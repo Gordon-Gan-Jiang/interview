@@ -12,7 +12,7 @@
 
 控制反转：理论思想，原来的对象是由使用者来进行控制，有了spring之后，可以把整个对象交给spring来帮我们进行管理
 
-​				DI：依赖注入，把对应的属性的值注入到具体的对象中，@Autowired，populateBean完成属性值的注入
+DI：依赖注入，把对应的属性的值注入到具体的对象中，比如@Autowired应用，populateBean完成属性值的注入
 
 容器：存储对象，使用map结构来存储，在spring中一般存在三级缓存，singletonObjects存放完整的bean对象,
 
@@ -20,9 +20,9 @@
 
 **分：**
 
-* 一般聊ioc容器的时候要涉及到容器的创建过程（beanFactory,DefaultListableBeanFactory）,向bean工厂中设置一些参数（BeanPostProcessor,Aware接口的子类）等等属性
+* 容器启动时会创建一个bean工厂，比如（beanFactory,DefaultListableBeanFactory）,向bean工厂中设置一些参数（BeanPostProcessor,Aware接口的子类）等等属性
 
-* 加载解析bean对象，准备要创建的bean对象的定义对象beanDefinition,(xml或者注解的解析过程)
+* 加载解析bean对象，准备要创建的bean对象的定义，对象beanDefinition,(xml或者注解的解析过程)
 
 * beanFactoryPostProcessor是一个后置处理类，参与beanFactory的构建, 此处是扩展点，
 
@@ -32,7 +32,7 @@
 
 * BeanPostProcessor的注册功能，方便后续对bean对象完成具体的扩展功能，通过postProcessBeforeInitialization, postProcessAfterInitialization来对bean的处理进行拓展
 
-* 通过反射的方式讲BeanDefinition对象实例化成具体的bean对象，
+* 通过反射的方式将BeanDefinition对象实例化成具体的bean对象，
 
 * bean对象的初始化过程（填充属性，调用aware子类的方法，调用BeanPostProcessor前置处理方法，调用init-mehtod方法，调用BeanPostProcessor的后置处理方法）
 
@@ -41,12 +41,6 @@
 * 销毁过程，处理一些需要回收的bean，释放内存空间，比如AOP过程中生成被代理的bean
 
 # 2.谈一下spring IOC的底层实现
-
-底层实现：工作原理，过程，数据结构，流程，设计模式，设计思想
-
-你对他的理解和你了解过的实现过程
-
-反射，工厂，设计模式（会的说，不会的不说），关键的几个方法
 
 createBeanFactory，getBean,doGetBean,createBean,doCreateBean,createBeanInstance(getDeclaredConstructor,newinstance),populateBean,initializingBean
 
@@ -140,6 +134,8 @@ createBeanFactory，getBean,doGetBean,createBean,doCreateBean,createBeanInstance
 
 原型模式：指定作用域为prototype
 
+构建者模式： BeanDefinitionBuilder
+
 工厂模式：BeanFactory
 
 模板方法：postProcessBeanFactory,onRefresh,initPropertyValue
@@ -160,21 +156,17 @@ createBeanFactory，getBean,doGetBean,createBean,doCreateBean,createBeanInstance
 
 # 7.Spring的AOP的底层实现原理? 
 
-动态代理
-
-aop是ioc的一个扩展功能，先有的ioc，再有的aop，只是在ioc的整个流程中新增的一个扩展点而已：BeanPostProcessor
-
-总：aop概念，应用场景，动态代理
+总： 面向切面编程，它利用一种称为“横切”的技术，剖解开封装的对象内部，并将那些影响了多个类的公共行为封装到一个可重用模块，并将其名为“Aspect”，即切面，利用动态代理实现；
 
 分：
 
-​		bean的创建过程中有一个步骤可以对bean进行扩展实现，aop本身就是一个扩展功能，所以在BeanPostProcessor的后置处理方法中来进行实现
+aop是ioc的一个扩展功能，先有的ioc，再有的aop，只是在ioc的整个流程中新增的一个扩展点而已：BeanPostProcessor的后置处理方法中来进行实现
 
-​		1、代理对象的创建过程（advice，切面，切点）
+​		1、代理对象的创建过程（advice，切面，切点），通过wrapIfNecessary方法创建代理对象的
 
 ​		2、通过jdk或者cglib的方式来生成代理对象
 
-​		3、在执行方法调用的时候，会调用到生成的字节码文件中，直接回找到DynamicAdvisoredInterceptor类中的intercept方法，从此方法开始执行
+​		3、在执行方法调用的时候，会调用到生成的字节码文件中，然后回到DynamicAdvisoredInterceptor类中的intercept方法，从此方法开始执行
 
 ​		4、根据之前定义好的通知来生成拦截器链
 
@@ -186,7 +178,7 @@ aop是ioc的一个扩展功能，先有的ioc，再有的aop，只是在ioc的�
 
 ​		总：spring的事务是由aop来实现的，首先要生成具体的代理对象，然后按照aop的整套流程来执行具体的操作逻辑，正常情况下要通过通知来完成核心功能，但是事务不是通过通知来实现的，而是通过一个TransactionInterceptor来实现的，然后调用invoke来实现具体的逻辑
 
-​		分：1、先做准备工作，解析各个方法上事务相关的属性，根据具体的属性来判断是否开始新事务
+​		分：1、先做准备工作，解析各个方法上事务相关的属性，根据具体的属性来判断是否开始新事务（由spring的事务传播特性决定的）
 
 ​				2、当需要开启的时候，获取数据库连接，关闭自动提交功能，开起事务
 
@@ -461,7 +453,7 @@ public class ExceptionAndLogAspect {
 
 2. 切点（Pointcut）：本质上是一个捕获连接点的结构。在 AOP 中，可以定义一个 point cut，来捕获相关方法的调用；
 
-3. 增强（Advice）： 增强是织入到目标类连接点上的一段程序代码。 Spring 提供的增强接口都是带方位名的，如：BeforeAdvice、AfterReturningAdvice、ThrowsAdvice 等；
+3. 增强（Advice）： 增强是织入到目标类连接点上的一段程序代码。 Spring 提供的增强接口都是带方位名的，如：BeforeAdvice、AfterAdvice、 AfterReturningAdvice、ThrowsAdvice, AroundAdvice,  等；
 
 4. 引介（Introduction）：是指在不更改源代码的情况，给一个现有类增加属性、方法，以及让现有类实现其它接口或指定其它父类等，从而改变类的静态结构；
 5. 织入（Weaving）：织入是将增强添加到目标类具体连接点上的过程，AOP 有三种织入方式：
