@@ -4,39 +4,35 @@
 
 <font face="微软雅黑" >
 
-### [JavaSE](https://github.com/wyjPro/interview/blob/master/wyj/JavaSE.md)
+### [JavaSE](https://github.com/Gordon-Gan-Jiang/interview/blob/master/gordon/JavaSE.md)
 
-### [Java 并发](https://github.com/wyjPro/interview/blob/master/wyj/concurrent.md)
+### [Java 并发](https://github.com/Gordon-Gan-Jiang/interview/blob/master/gordon/concurrent.md)
 
-### [JVM](https://github.com/wyjPro/interview/blob/master/wyj/Jvm.md)
+### [JVM](https://github.com/Gordon-Gan-Jiang/interview/blob/master/gordon/Jvm.md)
 
-### [JavaEE](https://github.com/wyjPro/interview/blob/master/wyj/javaEE.md)
+### [JavaEE](https://github.com/Gordon-Gan-Jiang/interview/blob/master/gordon/javaEE.md)
 
-### [数据库](https://github.com/wyjPro/interview/blob/master/wyj/database.md)
+### [数据库](https://github.com/Gordon-Gan-Jiang/interview/blob/master/gordon/database.md)
 
-### [Javaweb](https://github.com/wyjPro/interview/blob/master/wyj/javaweb.md)
+### [Javaweb](https://github.com/Gordon-Gan-Jiang/interview/blob/master/gordon/javaweb.md)
 
-### [SQL 语句](https://github.com/wyjPro/interview/blob/master/wyj/sql.md)
+### [SQL 语句](https://github.com/Gordon-Gan-Jiang/interview/blob/master/gordon/sql.md)
 
-### [网络](https://github.com/wyjPro/interview/blob/master/wyj/networks.md)
+### [数据结构算法](https://github.com/Gordon-Gan-Jiang/interview/blob/master/gordon/programs.md)
 
-### [数据结构算法](https://github.com/wyjPro/interview/blob/master/wyj/programs.md)
+### [设计模式](https://github.com/Gordon-Gan-Jiang/interview/blob/master/gordon/designpattern.md)
 
-### [设计模式](https://github.com/wyjPro/interview/blob/master/wyj/designpattern.md)
+### [redis、分布式](https://github.com/Gordon-Gan-Jiang/interview/blob/master/gordon/redis.md)
 
-### [redis、分布式](https://github.com/wyjPro/interview/blob/master/wyj/redis.md)
+### [Git 操作](https://github.com/Gordon-Gan-Jiang/interview/blob/master/gordon/git.md)
 
-### [Git 操作](https://github.com/wyjPro/interview/blob/master/wyj/git.md)
+### [linux 基本操作](https://github.com/Gordon-Gan-Jiang/interview/blob/master/gordon/linux.md)
 
-### [linux 基本操作](https://github.com/wyjPro/interview/blob/master/wyj/linux.md)
+### [大型网站技术架构](https://github.com/Gordon-Gan-Jiang/interview/blob/master/gordon/大型网站技术架构.md)
 
-### [大型网站技术架构](https://github.com/wyjPro/interview/blob/master/wyj/大型网站技术架构.md)
+### [TDD](https://github.com/Gordon-Gan-Jiang/interview/blob/master/gordon/TDD.md)
 
-### [面试杂记](https://github.com/wyjPro/interview/blob/master/wyj/面试杂记.md)
-
-### [TDD](https://github.com/wyjPro/interview/blob/master/wyj/TDD.md)
-
-### [idea快捷键](https://github.com/wyjPro/interview/blob/dev/wyj/idea.md)
+### [idea快捷键](https://github.com/Gordon-Gan-Jiang/interview/blob/master/gordon/idea.md)
 
 
 </font>
