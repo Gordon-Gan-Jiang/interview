@@ -192,9 +192,9 @@ CachedThreadPool 使用没有容量的 SynchronousQueue 作为线程池的工作
 
 [参考](https://www.jianshu.com/p/da9d051dcc3d)
 
-- AQS 全称为 AbstractQueuedSynchronizer,是并发容器中的同步器，它是抽象的队列式的同步器，AQS 定义了一套多线程访问共享资源的同步器框架，许多同步类都依赖它，如 ReentrantLock、Semaphore、CyclicBarrier、Condition、FutureTask 等
+- AQS 全称为 AbstractQueuedSynchronizer,是并发容器中的同步器，许多同步类都依赖它，如 ReentrantLock、Semaphore、CyclicBarrier、Condition、FutureTask 等
 
-* AQS 的实现依赖内部的同步队列（FIFO 双向队列）， 维护了一个 volatile int 类型的变量 state，用来表示当前同步状态，如果当前线程获取同步状态失败，AQS 会将该线程以及等待状态等信息构造成一个 Node，将其加入同步队列的尾部，同时阻塞当前线程，当同步状态释放时，唤醒队列的头节点
+* AQS 的实现依赖内部的同步队列（FIFO 双向队列）， 维护了一个 volatile int 类型的变量 state，用来表示当前同步状态，如果当前线程获取同步状态失败，AQS 会将该线程的引用以及等待状态等信息构造成一个 Node，将其加入同步队列的尾部，同时阻塞当前线程，当同步状态释放时，唤醒队列的头节点
 
   * Node是AQS内部类，有两个之前后节点的指针，并且还有当前线程的Thread属性
 
@@ -281,6 +281,8 @@ CachedThreadPool 使用没有容量的 SynchronousQueue 作为线程池的工作
 **Semaphore：**
 
 Semaphore 可以控制同时访问的线程个数，通过 acquire() 获取一个许可，如果没有就等待，而 release() 释放一个许可。
+
+![image-20211017162059618](https://tva1.sinaimg.cn/large/008i3skNgy1gvidufaf22j60sy0fy3zv02.jpg)
 
 **总结：**
 

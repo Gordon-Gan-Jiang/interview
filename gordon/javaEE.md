@@ -10,7 +10,7 @@
 
 **总：**
 
-控制反转：理论思想，原来的对象是由使用者来进行控制，有了spring之后，可以把整个对象交给spring来帮我们进行管理
+控制反转：原来的对象是由使用者来进行控制，有了spring之后，可以把整个对象交给spring来帮我们进行管理
 
 DI：依赖注入，把对应的属性的值注入到具体的对象中，比如@Autowired应用，populateBean完成属性值的注入
 
@@ -26,7 +26,7 @@ DI：依赖注入，把对应的属性的值注入到具体的对象中，比如
 
 * beanFactoryPostProcessor是一个后置处理类，参与beanFactory的构建, 此处是扩展点，
 
-  * 实现类ConfigurationClassPostProcessor，解析@Configure、@Component，    @ComponentScan、@Import注解，@Controller并且根据配置类的元数据信息，将配置类下的符合条件的属性定义成beanDefinition，放入到BeanFactory中的BeanDefinitionMaps和BeanDefinitionNams中，这里涉及到很多的递归调用。
+  * 实现类ConfigurationClassPostProcessor，解析@Configure、@Component，    @ComponentScan、@Import注解，@Controller并且根据配置类的元数据信息，解析bean对象定义成beanDefinition，放入到BeanFactory中的BeanDefinitionMaps和BeanDefinitionNams中，这里涉及到很多的递归调用。
 
   * 子类BeanDefinitionRegistryPostProcessor接口类，可以作为用户在注册表中添加自定义的BeanDefinition，以及修改BeanDefinition信息。
 
@@ -1047,7 +1047,7 @@ MyBatis 中用于实现动态 SQL 的元素主要有：if、choose（when，othe
 
 `foreach`：主要用在构建 `in` 条件中，它可以在 SQL 语句中进行迭代一个集合
 
-## 三级缓存
+## 二级缓存
 
 第一次发出一个查询 sql，sql 查询结果写入 sqlsession 的一级缓存中，缓存使用的数据结构是一个 map。 
 
