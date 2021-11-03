@@ -104,9 +104,7 @@
 
 ## JVM 调优
 
-随着钉钉项目qps上来，通过阿里云的jvm监控看到，YGC非常的频繁，发现Eden区的总的容量时300M，两个servivor区各自100M，我先将堆内存从512M增大到1G；并且设置Eden区和两个servivor区的比例为8：1：1，减少更多的对象在Eden区。参数-XX:survivorRatio=8;
-
-项目有一个版本上线了后，在高峰时刻，出现了频繁的FULLGC, cpu飙得很高，服务出现大量超时，我先获得内存溢出的dump文件，通过jstack分析发现，有一个同事，在利用阿里云OSS资源上传时，没有主动释放OSSClient对象。临时改为主动释放后，临时上线，后面单独定义一个bean。
+项目有一个版本上线了后，在高峰时刻，出现了频繁的FULLGC, cpu飙得很高，服务出现大量超时，我先获得内存溢出的dump文件，通过mat工具分析发现，内存被OSSclient对象占用了，有一个同事，在利用阿里云OSS资源上传时，没有主动释放OSSClient对象。临时改为主动释放后，临时上线，后面单独定义一个bean。
 
 设置生成-XX:+HeapDumpOnOutOfMemoryError-XX:HeapDumpPath=/path/to/heap/dump
 

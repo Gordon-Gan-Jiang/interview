@@ -2,7 +2,21 @@
 
 # Java 基础
 
-List.subList()返回的是一个RandomAccessSubList实例,该类型没有实现序列化，解决RandomAccessSubList未序列化的方法是重新放入ArrayList中
+## 浅拷贝和深拷贝
+
+深拷贝对引用数据类型的成员变量的对象图中所有的对象都开辟了内存空间，可以通过使用序列化和反序列化实现深拷贝；而浅拷贝只是传递地址指向，新的对象并没有对引用数据类型创建内存空间
+
+## 基本类型
+
+整数类型：byte（1字节）、short (2字节)、int (4字节)、long (8字节)
+
+字符类：char(2字节)
+
+浮点类型：float(4字节)、double(8字节)
+
+布尔类型：boolean(1字节)
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20191002170836482.png?#pic_center)
 
 ## BIO,NIO,AIO 有什么区别
 
@@ -65,9 +79,8 @@ Object 的 hashcode 方法是本地方法，也就是用 c 语言或 c++ 实现�
 
 1. Lambda 表达式 − Lambda 允许把函数作为一个方法的参数（函数作为参数传递进方法中）
 2. 接口的默认方法和静态方法 − 可以在接口中定义默认方法，使用 default 关键字，并提供默认的实现。所有实现这个接口的类都会接受默认方法的实现，除非子类提供的自己的实现
-3. 方法引用 − 方法引用使得开发者可以直接引用现存的方法、Java 类的构造方法或者实例对象。可以与 lambda 联合使用
-4. 重复注解- 注解有一个很大的限制是：在同一个地方不能多次使用同一个注解。Java 8 打破了这个限制，引入了重复注解的概念，允许在同一个地方多次使用同一个注解
-   ...... 等等（重点 lambda 表达式）
+3. 函数式接口 − 函数式接口(FunctionalInterface)就是一个有且仅有一个抽象方法，但是可以有多个非抽象方法的接口。
+4. Stream: Java 8 API添加了一个新的抽象称为流Stream,把真正的函数式编程风格引入到Java中,这种风格将要处理的元素集合看作一种流，流在管道中传输，并且可以在管道的节点上进行处理，比如筛选，排序，聚合等
 
 ## 说说 Lamda 表达式的优缺点。
 
@@ -306,6 +319,7 @@ public final class String
 4. toString():返回类的名字@实例的哈希码的 16 进制字符串；
 5. notify():唤醒等待队列中的其中一个线程；notifyAll():唤醒线程等待队列中的所有线程；
 6. wait(long timeout):让一个线程等待一段时间。
+7. hashCode 是native方法，返回的是对象的地址
 
 ## 重载(Overload)和重写(Override)的区别？相同参数不同返回值能重载吗？Overload 的方法是否可以改变返回值的类型
 
@@ -350,23 +364,6 @@ sList = new ArrayList<Number>();
 ## 是否可以在 static 环境中访问非 static 变量？
 
 不可以在 static 环静中，不可以访问非 static。因为静态的成员属于类，随着类的加载而加载到静态方法区内存，当类加载时，此时不一定有实例创建，没有实例，就不可以访问非静态的成员。类的加载先于实例的创建，因此静态环境中，不可以访问非静态。
-
-## 谈谈如何通过反射创建对象？
-
-[参考网址](https://www.cnblogs.com/qjlbky/p/5929452.html)
-
-1. 通过默认的构造器通过 Class 的 newInstance()方法来获取
-2. 通过指定的构造器来创建
-
-```java
-Class clazz = Class.forName(className);
-
- //1.通过Class获取指定构造方法，比如带两个参数
-Constructor cons =clazz.getConstructor(String.class,int.class);//拿的是公有的
-
-//2.通过指定的构造器对象进行对象的初始化。
-Object obj = cons.newInstance("lisisi",23);
-```
 
 ## Java 支持多继承么？
 
@@ -667,7 +664,7 @@ concurrenthashmap 是 hashmap 的多线程版本
 1. HashMap 是一个散列桶（数组和链表），它存储的内容是键值对(key-value)映射
 2. HashMap 采用了数组和链表的数据结构，能在查询和修改方便继承了数组的线性查找和链表的寻址修改
 3. HashMap 是非 synchronized，所以 HashMap 很快
-4. HashMap 可以接受 null 键和值，而 Hashtable 则不能（原因就是 equlas()方法需要对象，因为 HashMap 是后出的 API 经过处理才可以）
+4. HashMap 可以接受 null 键和值，键为空放在数组下标为0的位置
 
 **工作原理：**
 
@@ -677,7 +674,7 @@ HashMap 的底层主要是基于数组和链表来实现的，HashMap 底层是�
 
 **HashMap 类中的一些关键属性：**
 
-Node[] table 的初始化长度 length 默认值是 16；loadFactor 为负载因子(默认值是 0.75)，threshold 临界值大小，是 HashMap 所能容纳的最大数据量的 Node (键值对)个数。threshold = length \* loadFactor；当实际大小超过临界值时，会进行扩容。loadFactor 加载因子，其中加载因子是表示 Hash 表中元素的填满的程度。若加载因子越大，填满的元素越多，好处是，空间利用率高了，但冲突的机会加大了。反之，加载因子越小，填满的元素越少，好处是冲突的机会减小了，但空间浪费多了，取默认值 0.75 就好了；size 就是 HashMap 中实际存在的键值对数量；
+Node[] table 的初始化长度 length 默认值是 16；loadFactor 为负载因子(默认值是 0.75)，threshold 临界值大小，是 HashMap 所能容纳的最大数据量的 Node (键值对)个数。threshold = length \* loadFactor；当实际大小超过临界值时，会进行扩容。loadFactor 加载因子，其中加载因子是表示 Hash 表中元素的填满的程度。若加载因子越大，填满的元素越多，好处是，空间利用率高了，但冲突的机会加大了。反之，加载因子越小，填满的元素越少，好处是冲突的机会减小了，但空间浪费多了，取默认值 0.75 就好了；size 就是 HashMap 中实际存在的键值对数量，每次扩容为2次幂。
 modCount 字段主要用来记录 HashMap 内部结构发生变化的次数，主要用于迭代的快速失败。强调一点，内部结构发生变化指的是结构发生变化，例如 put 新键值对，但是某个 key 对应的 value 值被覆盖不属于结构变化。
 
 ```java
@@ -719,12 +716,13 @@ static int indexFor(int h, int length) {  //jdk1.7的源码，jdk1.8没有这个
 
 **put()操作原理：**
 
-1. 对 key 的 hashCode()做 hash，然后再计算 index;
-2. 如果没碰撞直接放到 bucket 里；
-3. 如果碰撞了，以链表的形式存在 buckets 后；
-4. 如果碰撞导致链表过长(大于等于 TREEIFY_THRESHOLD)，就把链表转换成红黑树；
-5. 如果节点已经存在就替换 old value(保证 key 的唯一性)
-6. 如果 bucket 满了(超过 load factor \* current capacity)，就要 resize。
+1. Node<K,V> 类型的数组是否为空或长度是否为0，是的话扩容
+2. 对 key 的 hashCode()做 hash，然后再计算 index;
+3. 目标位置是为空，是直接插入，
+4. 目标位置不为空并且key存在直接覆盖
+5. 如果table[i]是树节点，红黑树的方式插入
+6. 如果table[i]不是树节点，遍历链表尾插入或者覆盖相同的key的值
+7. 如果 bucket 满了(超过 load factor \* current capacity)，就要 resize。
 
 **扩容机制 resize**
 
@@ -829,44 +827,25 @@ ArrayList 是实现了基于动态数组的数据结构，LinkedList 基于链�
 
 [面试题：Java容器之ArrayList全解析](https://mp.weixin.qq.com/s/Hd22c-CHQ8OZs4sY4ukZFw)
 
-ArrayList 继承自 AbstractList，实现了 List 接口。底层基于数组实现容量大小动态变化。允许 null 的存在，同时还实现了 RandomAccess、Cloneable、Serializable 接口，是支持快速访问、复制、序列化的。
+* ArrayList 继承自 AbstractList，实现了 List 接口。底层基于数组实现容量大小动态变化。允许 null 的存在，同时是支持快速访问、复制、序列化的。内部有一个Object[] 数组。
 
-动态数组不是意味着去改变原有内部生成的数组的长度，而是保留原有数组的引用，将其指向新生成的数组对象，这样会造成数组的长度可变的假象。
+* 动态数组不是意味着去改变原有内部生成的数组的长度，而是保留原有数组的引用，将其指向新生成的数组对象，这样会造成数组的长度可变的假象。
+*  当第一次使用 add() 添加元素时，ArrayList的容量会为 默认容量为10
 
-ArrayList 的扩容计算为 `newCapacity = oldCapacity + (oldCapacity >> 1)`；且扩容并非是无限制的，有内存限制，虚拟机限制
+* ArrayList 的扩容计算为 `newCapacity = oldCapacity + (oldCapacity >> 1)`,为原来数组的1.5倍；最大长度Integer_MAX_VALUE -8，扩容是将老的数组元素拷贝到新的数组上。
+  * 为什么是1.5
+    * 位运算比较快，避免空间浪费，老容量的1.5倍一个试探值，可能还不够，需要再扩容
+  * 为什么减去8
+    * 因为某些JVM会在数组中保留一些头字，尝试分配这个最大存储容量，可能会导致array容量大于VM的limit，最终导致OutOfMemoryError
+* 删除是先找到需要被删除的元素，之后所有元素向左移一位，并且将末尾设置null
 
-扩容方法 `ensureCapacityInternal()` ArrayList在每次增加元素（可能是1个，也可能是一组）时，都要调用该方法来确保足够的容量。当容量不足以容纳当前的元素个数时，就设置新的容量为旧的容量的 1.5 倍加 1，如果设置后的新容量还不够，则直接新容量设置为传入的参数（也就是所需的容量），而后用 `Arrays.copyof()` 方法将元素拷贝到新的数组。从中可以看出，当容量不够时，每次增加元素，都要将原来的元素拷贝到一个新的数组中，非常之耗时，也因此建议在事先能确定元素数量的情况下，才使用 ArrayList，否则不建议使用。
-
-`Arrays.copyof()` 非常之耗时，也因此建议在事先能确定元素数量的情况下，才使用ArrayList，否则不建议使用。
-
-ArrayList 默认容量为 10。调用无参构造新建一个 ArrayList 时，它的 elementData = DEFAULTCAPACITYEMPTYELEMENTDATA, 当第一次使用 add() 添加元素时，ArrayList的容量会为 10。
-
-使用 ArrayList 比较常见的一个问题就是在遍历 ArrayList 的时候调用 `remove()` 方法进行元素的删除操作，从而得到意想不到的结果：在调用 `remove()` 方法时 List 的长度会发生变化而且元素的位置会发生移动，从而在遍历时 list 实际上是变化的。
-
-解决方案：
-1. 逆向遍历List删除
-2. 使用迭代器中的remove方法
+* **多个线程争抢修改信息时候,当一个线程正在修改却被其他线程抢占去同一个位置的修改权造成修改错误,**
 
 **LinkedList**
 
 [面试题：Java容器之LinkedList全解析](https://mp.weixin.qq.com/s/psLuW2G4uJIqDjvwnyYbjg)
 
-实现List接口与Deque接口双向链表，实现了列表的所有操作
-Deque接口：双端队列，支持在两端插入和删除元素
-
-添加节点：
-1. 记录当前末尾节点，通过构造另外一个指向末尾节点的指针 l
-2. 产生新的节点：注意的是由于是添加在链表的末尾，next 是为 null 的
-3. last指向新的节点
-4. 这里有个判断，我的理解是判断是否为第一个元素(当 l==null 时，表示链表中是没有节点的)， 那么就很好理解这个判断了，如果是第一节点，则使用 first 指向这个节点，若不是则当前节点的 next 指向新增的节点
-5. size 增加 
-
-
-删除节点：
-1. 首先确定 index 的位置，是靠近 first 还是靠近 last
-2. 若靠近 first 则从头开始查询，否则从尾部开始查询，可以看出这样避免极端情况的发生，也更好的利用了 LinkedList 双向链表的特征
-
-这也正是不使用 `foreach` 迭代遍历 LinkedList，原因是，每一次 `get` 任何一个位置的数据的时候，都会把前面的数据走一遍，遍历的时间复杂度为 `O(N2)`
+实现List接口与Deque接口双向链表，实现了列表的所有操作，Deque接口：双端队列，支持在两端插入和删除元素
 
 相同点：
 
@@ -1036,6 +1015,27 @@ JAVA 语言编译之后会生成一个.class 文件，反射就是通过字节�
 
 作用：反射机制指的是程序在运行时能够获取自身的信息。在 JAVA 中，只要给定类的名字，那么就可以通过反射机制来获取类的所有信息。
 
+影响：反射的类型是动态解析的，这将导致JVM无法实施某些特定的优化(具体来说，就是我们常说的JIT优化)，非常耗时
+
+## 谈谈如何通过反射创建对象？
+
+[参考网址](https://www.cnblogs.com/qjlbky/p/5929452.html)
+
+1. 通过默认的构造器通过 Class 的 newInstance()方法来获取
+2. 通过指定的构造器来创建
+
+```java
+Class clazz = Class.forName(className);
+
+ //1.通过Class获取指定构造方法，比如带两个参数
+Constructor cons =clazz.getConstructor(String.class,int.class);//拿的是公有的
+
+//2.通过指定的构造器对象进行对象的初始化。
+Object obj = cons.newInstance("lisisi",23);
+```
+
+## 
+
 ## 运行时异常与一般异常有何异同？
 
 ## error 和 exception ，ClassNotFoundException和NoClassDefFoundError的区别
@@ -1177,5 +1177,5 @@ public Object roadSerializable(byte[] value) {
 
 # jdk动态代理和CGLIB动态代理的区别
 
-* jdk的动态代理是基于反射的机制，生成一个实现了需要被代理接口的类，只有在JVM内存中存在class对象，并没有对应的class文件。在调用方法是先调用invoke方法，核心是实现了InvokeMethod接口。
+* jdk的动态代理是基于反射的机制，生成一个实现了需要被代理接口的类，只有在JVM内存中存在class对象，并没有对应的class文件。在调用方法是先调用invoke方法，核心是实现了InvocationHandler接口。
 * CGLIB动态代理是利用asm开源包，对代理对象的class文件加载，通过修改其字节码文件生成子类来处理。核心是实现了MethodInterceptor接口，使用interceptor()方法进行切面处理

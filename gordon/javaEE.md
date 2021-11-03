@@ -2,6 +2,18 @@
 
 # Spring
 
+# spring boot 自动装配的原理
+
+**概念：** 自动装配就是为了将spring.factories文件中的获取，创建对应的bean对象，并且由spring容器来帮我们管理
+
+1、当启动springboot启用程序的时候，首先会创建springBootApplication, 在对象的构造方法中进行参数的初始化工作中，整个过程中会加载整个应用的spring,factories文件，将文件的内容放在缓存对象中，方便后续获取。
+
+2、在调用启动类的run方法时会将启动类作为一个BeanDefinition注册到registry中，方便后续在BeanFactoryPostProcessor调用执行，找到对应的类，完成@SpringBootApplication, @EnableAutoConfiguration等解析工作
+
+3、run方法时会调用AbstractApplicationContext中的refresh方法。方法中会调用invokeBeanFactoryPostProcessors方法，来处理所用的BFPP子类，子类中有一个configurationClassPostProcessor，在调用BFPP的postProcessBeanDefinitionRegistry方法，来解析处理各种注解，包括@Configure、@Component，@ComponentScan、@Import注解，@Controller。
+
+4、在解析@Import注解的时候，会有一个getImport方法，此处会识别到AutoConfigurationImportSelec归属于ImportSelect的子类，后续会调用process方法来完成EnableAutoConfiguration的加载，加载完成后会将对应的beanDefinition 放入到BeanDefinitionMap，和beanDefinitionNames中。
+
 [博客大致写了 Spring 的主要代码流程](https://www.jianshu.com/p/5c781f264467?from=groupmessage)
 
 [博主自己动手写了一个 Spring IOC](https://www.cnblogs.com/jeysin/p/10091269.html)
@@ -12,7 +24,7 @@
 
 控制反转：原来的对象是由使用者来进行控制，有了spring之后，可以把整个对象交给spring来帮我们进行管理
 
-DI：依赖注入，把对应的属性的值注入到具体的对象中，比如@Autowired应用，populateBean完成属性值的注入
+DI：依赖注入，把对应的属性的值注入到具体的对象中，比如@Autowired应用，在bean对象初始化时调用populateBean方法完成属性值的注入
 
 容器：存储对象，使用map结构来存储，在spring中一般存在三级缓存，singletonObjects存放完整的bean对象,
 
@@ -27,12 +39,9 @@ DI：依赖注入，把对应的属性的值注入到具体的对象中，比如
 * beanFactoryPostProcessor是一个后置处理类，参与beanFactory的构建, 此处是扩展点，
 
   * 实现类ConfigurationClassPostProcessor，解析@Configure、@Component，    @ComponentScan、@Import注解，@Controller并且根据配置类的元数据信息，解析bean对象定义成beanDefinition，放入到BeanFactory中的BeanDefinitionMaps和BeanDefinitionNams中，这里涉及到很多的递归调用。
-
-  * 子类BeanDefinitionRegistryPostProcessor接口类，可以作为用户在注册表中添加自定义的BeanDefinition，以及修改BeanDefinition信息。
-
-* BeanPostProcessor的注册功能，方便后续对bean对象完成具体的扩展功能，通过postProcessBeforeInitialization, postProcessAfterInitialization来对bean的处理进行拓展
-
+* 子类BeanDefinitionRegistryPostProcessor接口类，可以作为用户在注册表中添加自定义的BeanDefinition，以及修改BeanDefinition信息。
 * 通过反射的方式将BeanDefinition对象实例化成具体的bean对象，
+* BeanPostProcessor的注册功能，方便后续对bean对象完成具体的扩展功能，通过postProcessBeforeInitialization, postProcessAfterInitialization来对bean的处理进行拓展
 
 * bean对象的初始化过程（填充属性，调用aware子类的方法，调用BeanPostProcessor前置处理方法，调用init-mehtod方法，调用BeanPostProcessor的后置处理方法）
 
@@ -162,9 +171,11 @@ createBeanFactory，getBean,doGetBean,createBean,doCreateBean,createBeanInstance
 
 aop是ioc的一个扩展功能，先有的ioc，再有的aop，只是在ioc的整个流程中新增的一个扩展点而已：BeanPostProcessor的后置处理方法中来进行实现
 
-​		1、代理对象的创建过程（advice，切面，切点），通过wrapIfNecessary方法创建代理对象的
+​       0、首先准备好代理对象的BeanDefinition对象, 比如需要代理类的bean定义信息，切面的bean定义信息、通知器AspectJPointcutAdvisor、AspectJAroundAdvice、AspectJExpresionPointcut(原型模式)切点的表达式，动态代理创建器：internalAutoProxyCreator
 
-​		2、通过jdk或者cglib的方式来生成代理对象
+​		1、代理对象的创建过程（advice，切面，切点），在wrapIfNecessary方法创建代理对象的
+
+​		2、通过jdk或者cglib的方式来生成代理对象（代理对象是不是接口）
 
 ​		3、在执行方法调用的时候，会调用到生成的字节码文件中，然后回到DynamicAdvisoredInterceptor类中的intercept方法，从此方法开始执行
 
@@ -194,14 +205,6 @@ aop是ioc的一个扩展功能，先有的ioc，再有的aop，只是在ioc的�
 
 # 9.谈一下spring事务传播？
 
-​			传播特性有几种？7种
-
-​			Required,Requires_new,nested,Support,Not_Support,Never,Mandatory
-
-​			某一个事务嵌套另一个事务的时候怎么办？
-
-​			A方法调用B方法，AB方法都有事务，并且传播特性不同，那么A如果有异常，B怎么办，B如果有异常，A怎么办？
-
 --------
 
 ​			总：事务的传播特性指的是不同方法的嵌套调用过程中，事务应该如何进行处理，是用同一个事务还是不同的事务，当出现异常的时候会回滚还是提交，两个方法之间的相关影响，在日常工作中，使用比较多的是required，Requires_new,nested
@@ -213,6 +216,14 @@ aop是ioc的一个扩展功能，先有的ioc，再有的aop，只是在ioc的�
 ​					3、如果外层方法是requires_new，内层方法是，required,requires_new,nested
 
 ​					4、如果外层方法是nested，内层方法是，required,requires_new,nested
+
+1. `Propagation.REQUIRED`：如果当前没有事务，就新建一个事务，如果已经存在一个事务中，加入到这个事务中，这是 Spring 默认的传播行为
+2. `Propagation.SUPPORTS`：支持当前事务，如果当前没有事务，就以非事务方式执行
+3. `Propagation.MANDATORY`：使用当前的事务，如果当前没有事务，就抛出异常
+4. `Propagation.REQUIRES_NEW`：无论是否存在当前事务，方法都会在新的事务中运行
+5. `Propagation.NOT_SUPPORTED`： 以非事务方式执行操作，如果当前存在事务，就把当前事务挂起
+6. `Propagation.NEVER`： 以非事务方式执行，如果当前存在事务，则抛出异常
+7. `Propagation.NESTED`：嵌套事务，如果当前存在事务，则在嵌套事务内执行。也就是调用方法如果抛出异常只回滚自己内部执行的 SQL，而不回滚主方法的 SQL
 
 ​	
 
@@ -346,7 +357,7 @@ FactoryBean 支持泛型，即接口声明改为 FactoryBean<T>的形式。一�
 
 ## 请问 Spring 中 Bean 的作用域有哪些？
 
-1. singleton 原型模式，默认值，IOC 容器中仅存在一个 Bean 实例，Bean 都以单例模式存在
+1. singleton 单例模式，默认值，IOC 容器中仅存在一个 Bean 实例，Bean 都以单例模式存在
 2. prototype 原型模式，在每次请求获取 Bean 的时候，都会创建一个新的实例，它在容器初始化的时候不会创建实例，采用的是延迟加载的形式注入 Bean，当你使用的时候，才会进行实例化，每次实例化获取的对象都不是同一个，就像 BeanFactory 的实例化模式实例不唯一
 3. request，http 请求模式，在每一次 http 请求时会创建一个实例，该实例仅在当前 http request 有效
 4. session 会话，在每一次 http 请求时会创建一个实例，该实例仅在当前 http session 有效
@@ -449,9 +460,9 @@ public class ExceptionAndLogAspect {
 
 ## 你如何理解 AOP 中的连接点（Joinpoint）、切点（Pointcut）、增强（Advice）、引介（Introduction）、织入（Weaving）、切面（Aspect）这些概念？
 
-1. 连接点（Joinpoint）：是程序执行中的一个精确执行点，例如类中的一个方法。它是一个抽象的概念，在实现 AOP 时，并不需要去定义一个 join point；
+1. 连接点（Joinpoint）：连接点表示应用执行过程中能够插入切面的一个点，这个点可以是方法的调用、异常的抛出，并不需要去定义一个 join point；
 
-2. 切点（Pointcut）：本质上是一个捕获连接点的结构。在 AOP 中，可以定义一个 point cut，来捕获相关方法的调用；
+2. 切点（Pointcut）：可以插入增强处理的连接点；
 
 3. 增强（Advice）： 增强是织入到目标类连接点上的一段程序代码。 Spring 提供的增强接口都是带方位名的，如：BeforeAdvice、AfterAdvice、 AfterReturningAdvice、ThrowsAdvice, AroundAdvice,  等；
 
@@ -522,18 +533,6 @@ Spring 支持编程式事务管理和声明式事务管理。选择声明式事�
 2. 执行开发者的代码逻辑；
 3. 产生异常且满足事务回滚配置条件，事务回滚，否则事务提交；
 4. 事务资源释放。
-
-**事务传播机制：**
-
-[Spring 的事务传播机制实例](https://www.jianshu.com/p/25c8e5a35ece)
-
-1. `Propagation.REQUIRED`：如果当前没有事务，就新建一个事务，如果已经存在一个事务中，加入到这个事务中，这是 Spring 默认的传播行为
-2. `Propagation.SUPPORTS`：支持当前事务，如果当前没有事务，就以非事务方式执行
-3. `Propagation.MANDATORY`：使用当前的事务，如果当前没有事务，就抛出异常
-4. `Propagation.REQUIRES_NEW`：无论是否存在当前事务，方法都会在新的事务中运行
-5. `Propagation.NOT_SUPPORTED`： 以非事务方式执行操作，如果当前存在事务，就把当前事务挂起
-6. `Propagation.NEVER`： 以非事务方式执行，如果当前存在事务，则抛出异常
-7. `Propagation.NESTED`：嵌套事务，如果当前存在事务，则在嵌套事务内执行。也就是调用方法如果抛出异常只回滚自己内部执行的 SQL，而不回滚主方法的 SQL
 
 ## Spring 事务写在哪一部分，为什么不写在 dao， controller 层
 

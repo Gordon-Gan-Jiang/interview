@@ -70,12 +70,6 @@ public class AtomicCounter {
    2. addAddGet(int dalta) : 以原子方式将给定值与当前值相加
    3. get() : 获取当前值
 
-## 介绍一下生产者消费者模式？
-
-生产者和消费者模式是通过一个容器解决生存者和消费者的强耦合问题。生产者和消费者之间不直接通信，而是通过阻塞队列来进行通信，所以生产者生产完数据之后不用等待消费者来处理，而是直接扔给阻塞队列，消费者不找生产者要数据，而是直接从阻塞队列里取，阻塞队列相当于一个缓冲区，平衡了生产者和消费者的处理能力。
-
-Java 中的线程池实际就是一种生产者和消费者模式的实现方式，生产者把任务丢给线程池，线程池创建线程并处理任务，如果将要运行的任务数大于线程池的基本线程数就把任务扔到阻塞队列里面，这种做法比使用一个阻塞队列实现生产者和消费者模式要好的多，因为消费者能够处理直接就处理掉了，这样速度更快，而生产者先存，消费者再取这种方式显然要慢一些。
-
 ## 线程，进程，然后线程创建有很大开销，怎么优化？
 
 进程是资源（CPU、内存等）分配的基本单位，它是程序执行时的一个实例。程序运行时系统就会创建一个进程，并为它分配资源，然后把该进程放入进程就绪队列，进程调度器选中它的时候就会为它分配 CPU 时间，程序开始真正运行。
@@ -125,45 +119,33 @@ CachedThreadPool 使用没有容量的 SynchronousQueue 作为线程池的工作
 
 **参数**
 
-1. `corePoolSize`:核心线程池大小
+* corePoolSize
 
-2. `MaximumPoolSize`：线程池允许创建的最大线程数，如果使用无界队列该参数无效
+线程池的核心线程数。在没有设置 allowCoreThreadTimeOut 为 true 的情况下，核心线程会在线程池中一直存活，即使处于闲置状态。
 
-3. keepAliveTime：线程空闲后的存活时长
+* maximumPoolSize
 
-4. `ThreadFactory`：线程工厂，主要用来创建线程
+线程池所能容纳的最大线程数。当活动线程(核心线程+非核心线程)达到这个数值后，后续任务将会根据 RejectedExecutionHandler 来进行拒绝策略处理。
 
-5. `runnableTaskQueue`：任务队列，用于保存等待执行的任务的阻塞队列
+*  keepAliveTime
 
-6. `RejectedExecutionHandler`：线程池任务满载后采取的任务拒绝策略 
+非核心线程闲置时的超时时长。超过该时长，**非核心线程**就会被回收。若线程池通设置核心线程也允许 timeOut，即 allowCoreThreadTimeOut 为 true，则该时长同样会作用于核心线程，在超过 aliveTime 时，核心线程也会被回收，AsyncTask 配置的线程池就是这样设置的。
 
-   * corePoolSize
+* unit
 
-   线程池的核心线程数。在没有设置 allowCoreThreadTimeOut 为 true 的情况下，核心线程会在线程池中一直存活，即使处于闲置状态。
+keepAliveTime 时长对应的单位。Timeunit
 
-   maximumPoolSize
+* workQueue
 
-   线程池所能容纳的最大线程数。当活动线程(核心线程+非核心线程)达到这个数值后，后续任务将会根据 RejectedExecutionHandler 来进行拒绝策略处理。
+线程池中的任务队列，通过线程池的 execute() 方法提交的 Runnable 对象会存储在该队列中。
 
-   *  keepAliveTime
+* ThreadFactory
 
-   非核心线程闲置时的超时时长。超过该时长，**非核心线程**就会被回收。若线程池通设置核心线程也允许 timeOut，即 allowCoreThreadTimeOut 为 true，则该时长同样会作用于核心线程，在超过 aliveTime 时，核心线程也会被回收，AsyncTask 配置的线程池就是这样设置的。
+线程工厂，功能很简单，就是为线程池提供创建新线程的功能。这是一个接口，可以通过自定义，做一些自定义线程名的操作。
 
-   * unit
+* RejectedExecutionHandler
 
-   keepAliveTime 时长对应的单位。Timeunit
-
-   * workQueue
-
-   线程池中的任务队列，通过线程池的 execute() 方法提交的 Runnable 对象会存储在该队列中。
-
-   * ThreadFactory
-
-   线程工厂，功能很简单，就是为线程池提供创建新线程的功能。这是一个接口，可以通过自定义，做一些自定义线程名的操作。
-
-   * RejectedExecutionHandler
-
-   当任务无法被执行时(超过线程最大容量 maximum 并且 workQueue 已经被排满了)的处理策略，这里有四种任务拒绝类型。
+当任务无法被执行时(超过线程最大容量 maximum 并且 workQueue 已经被排满了)的处理策略，这里有四种任务拒绝类型。
 
 **策略**
 
@@ -187,6 +169,11 @@ CachedThreadPool 使用没有容量的 SynchronousQueue 作为线程池的工作
   3 、当 workQueue 已存满，放不下新任务时则新建非核心线程入池，并处理请求直到线程数目达到 maximumPoolSize（最大线程数量设置值）。
 
   4、如果线程池中线程数大于 maximumPoolSize 则使用 RejectedExecutionHandler 来进行任务拒绝处理。
+
+## 线程池用到了哪些设计模式
+
+* 策略模式：线程池七个参数中有一个是拒绝策略，可以去手动实现RejectExecutionHandler
+* 享元模式：线程的复用
 
 ## AQS
 
@@ -267,6 +254,35 @@ CachedThreadPool 使用没有容量的 SynchronousQueue 作为线程池的工作
 
 第一种:继承 Thread 类,重写 run 方法.第二种:实现 Runable 接口,重写 run 方法
 
+## Future 
+
+一个 Future 代表着一个异步计算结果，可以得到别的线程的返回值，它提供了一些方法去检查计算是否完成，等待其完成，以及检索计算结果等。接下来看下它的接口声明
+
+![](https://tva1.sinaimg.cn/large/008i3skNgy1gvlgiqkqrqj615s0kymzk02.jpg)
+
+## FutureTask
+
+FutureTask实现了Future接口, 继承了Runnable，FutureTask的实现是基于AQS（抽象同步队列）的，每一个基于AQS实现的同步器都会包含两种类型的操作，至少一个acquire操作，这个操作阻塞调用线程，除非直到AQS允许这个线程继续执行，至少一个release操作，这个操作改变AQS状态，这个状态可以允许一个或多个阻塞线程接触阻塞，FutureTask中的方法run()或者cancle()扮演者这个角色
+
+* 七个状态
+
+  ```java
+  private` `static` `final` `int` `NEW     = ``0``; ``//任务新建和执行中
+  private` `static` `final` `int` `COMPLETING  = ``1``; ``//任务将要执行完毕
+  private` `static` `final` `int` `NORMAL    = ``2``; ``//任务正常执行结束
+  private` `static` `final` `int` `EXCEPTIONAL = ``3``; ``//任务异常
+  private` `static` `final` `int` `CANCELLED  = ``4``; ``//任务取消
+  private` `static` `final` `int` `INTERRUPTING = ``5``; ``//任务线程即将被中断
+  private` `static` `final` `int` `INTERRUPTED = ``6``; ``//任务线程已中断
+  ```
+
+
+
+## ThreadLocal
+
+ThreadLocal是Java里一种特殊的变量。每个线程都有一个ThreadLocal就是每个线程都拥有了自己独立的一个变量，竞争条件被彻底消除了。如果为每个线程提供一个自己独有的变量拷贝，将大大提高效率。首先，通过复用减少了代价高昂的对象的创建个数。其次，你在没有使用高代价的同步或者不变性的情况下获得了线程安全
+ThreadLocal里面有一个ThreadLocalMap，key就是当前线程，value是一个Object对象，
+
 ## CountDownLatch，CyclicBarrier，Semaphore，CountDownLatch
 
 **CountDownLatch：**
@@ -307,7 +323,7 @@ Semaphore 可以控制同时访问的线程个数，通过 acquire() 获取一�
 
 创建线程通过 start 方法进入就绪状态，获取 cpu 的执行权进入运行状态，失去 cpu 执行权会回到就绪状态，运行状态完成进入消亡状态，运行状态通过 sleep 方法和 wait 方法进入阻塞状态，休眠结束或者通过 notify 方法或者 notifyAll 方法释放锁进入就绪状态。
 
-![image-20211010212347961](/Users/gankang/Library/Application Support/typora-user-images/image-20211010212347961.png)
+![image-20211010212347961](https://tva1.sinaimg.cn/large/008i3skNgy1gvl0kcoh7uj60n207ajrn02.jpg)
 
 ## 同步方法和同步代码块的区别是什么？
 
@@ -500,49 +516,6 @@ synchronized 适用于写比较多的情况下（多写场景，冲突一般较�
 * 自适应的自旋锁（适应性自旋锁）：
   自适应意味着自旋的时间（次数）不再固定，而是由前一次在同一个锁上的自旋时间及锁的拥有者的状态来决定。如果在同一个锁对象上，自旋等待刚刚成功获得过锁，并且持有锁的线程正在运行中，那么虚拟机就会认为这次自旋也是很有可能再次成功，进而它将允许自旋等待持续相对更长的时间。如果对于某个锁，自旋很少成功获得过，那在以后尝试获取这个锁时将可能省略掉自旋过程，直接阻塞线程，避免浪费处理器资源。
 
-### 无锁 VS 偏向锁 VS 轻量级锁 VS 重量级锁
-
-jdk6 对锁的实现引入了大量的优化，如自旋锁、适应性自旋锁、锁消除、锁粗化、偏向锁、轻量级锁等技术来减少锁操作的开销。锁主要存在四中状态，依次是：无锁状态、偏向锁状态、轻量级锁状态、重量级锁状态。
-
-> 偏向锁通过对比 Mark Word 解决加锁问题，避免执行 CAS 操作。而轻量级锁是通过用 CAS 操作和自旋来解决加锁问题，避免线程阻塞和唤醒而影响性能。重量级锁是将除了拥有锁的线程以外的线程都阻塞。
-
-* mark word
-
-![](https://tva1.sinaimg.cn/large/008i3skNgy1gvdzi9bdhej61hc0ii42d02.jpg)
-
-- java 对象头
-
-  synchronized 用的锁是存在 Java 对象头里的。synchronized 是悲观锁，在操作同步资源之前需要给同步资源先加锁，这把锁就是存在 Java 对象头里的。Hotspot 的对象头主要包括两部分数据：Mark Word（标记字段）、Klass Pointer（类型指针）
-
-  - Mark Word ：默认存储对象的 HashCode，分代年龄和锁标志位信息
-  - Klass Pointer ：对象指向它的类元数据的指针，虚拟机通过这个指针来确定这个对象是哪个类的实例
-
-- Moniter
-
-  Monitor 是线程私有的数据结构，每一个被锁住的对象都会和一个 monitor 关联，同时 monitor 中有一个 Owner 字段存放拥有该锁的线程的唯一标识，表示该锁被这个线程占用
-
-- 无锁
-
-  无锁没有对资源进行锁定，所有的线程都能访问并修改同一个资源，但同时只有一个线程能修改成功。CAS 原理及应用即是无锁的实现
-
-- 偏向锁
-  - 概念：
-    指一段同步代码一直被一个线程所访问，那么该线程会自动获取锁，降低获取锁的代价。
-  - 介绍：
-    当一个线程访问同步代码块并获取锁时，会在 Mark Word 里存储锁偏向的线程 ID。在线程进入和退出同步块时不再通过 CAS 操作来加锁和解锁，而是检测 Mark Word 里是否存储着指向当前线程的偏向锁。引入偏向锁是为了在无多线程竞争的情况下尽量减少不必要的轻量级锁执行路径，因为轻量级锁的获取及释放依赖多次 CAS 原子指令，而偏向锁只需要在置换 ThreadID 的时候依赖一次 CAS 原子指令即可。
-- 轻量级锁
-  - 概念：
-    是指当锁是偏向锁的时候，被另外的线程所访问，偏向锁就会升级为轻量级锁，其他线程会通过自旋的形式尝试获取锁，不会阻塞，从而提高性能。
-  - 介绍：
-    - 在代码进入同步块的时候，如果同步对象锁状态为无锁状态（锁标志位为“01”状态，是否为偏向锁为“0”），虚拟机首先将在当前线程的栈帧中建立一个名为锁记录（Lock Record）的空间，用于存储锁对象目前的 Mark Word 的拷贝，然后拷贝对象头中的 Mark Word 复制到锁记录中。
-    - 拷贝成功后，虚拟机将使用 CAS 操作尝试将对象的 Mark Word 更新为指向 Lock Record 的指针，并将 Lock Record 里的 owner 指针指向对象的 Mark Word。
-    - 如果这个更新动作成功了，那么这个线程就拥有了该对象的锁，并且对象 Mark Word 的锁标志位设置为“00”，表示此对象处于轻量级锁定状态。
-    - 如果轻量级锁的更新操作失败了，虚拟机首先会检查对象的 Mark Word 是否指向当前线程的栈帧，如果是就说明当前线程已经拥有了这个对象的锁，那就可以直接进入同步块继续执行，否则说明多个线程竞争锁。
-    - 若当前只有一个等待线程，则该线程通过自旋进行等待。但是当自旋超过一定的次数，或者一个线程在持有锁，一个在自旋，又有第三个来访时，轻量级锁升级为重量级锁。
-- 重量级锁
-
-  升级为重量级锁时，锁标志的状态值变为“10”，此时 Mark Word 中存储的是指向重量级锁的指针，此时等待锁的线程都会进入阻塞状态。
-
 ### 公平锁 VS 非公平锁
 
 > 公平锁就是通过同步队列来实现多个线程按照申请锁的顺序来获取锁，从而实现公平的特性。非公平锁加锁时不考虑排队等待问题，直接尝试获取锁，所以存在后申请却先获得锁的情况。
@@ -601,7 +574,7 @@ jdk6 对锁的实现引入了大量的优化，如自旋锁、适应性自旋锁
 
 ## 讲一下 synchronized，可重入怎么实现
 
-实现方法是为每个锁关联一个线程持有者 Moniter 和计数器 status，当计数器为 0 时表示该锁没有被任何线程持有，那么任何线程都可能获得该锁而调用相应的方法；当某一线程请求成功后，JVM 会记下锁的持有线程，并且将计数器置为 1；此时其它线程请求该锁，则必须等待；而该持有锁的线程如果再次请求这个锁，就可以再次拿到这个锁，同时计数器会递增；当线程退出同步代码块时，计数器会递减，如果计数器为 0，则释放该锁。
+偏向锁在当前线程栈上重入次数；轻量级锁则在锁记录计数重入次数；重量级锁则线程的ObjectMonitor对象的属性上，实现方法是为每个锁关联一个线程持有者 Moniter 和计数器 status，当计数器为 0 时表示该锁没有被任何线程持有，那么任何线程都可能获得该锁而调用相应的方法；当某一线程请求成功后，JVM 会记下锁的持有线程，并且将计数器置为 1；此时其它线程请求该锁，则必须等待；而该持有锁的线程如果再次请求这个锁，就可以再次拿到这个锁，同时计数器会递增；当线程退出同步代码块时，计数器会递减，如果计数器为 0，则释放该锁。
 
 ## 锁和同步的区别
 
@@ -713,7 +686,87 @@ Java 内存模型，其实是保证了 Java 程序在各种平台下对内存的
 
 [Synchronized 的实现原理（一）](http://www.hollischuang.com/archives/1883)
 
-synchronized 有两种使用形式，同步方法和同步代码块，对于同步方法，JVM 采用`ACC_SYNCHRONIZED`标记符来实现同步。 对于同步代码块。JVM 采用`monitorenter`、`monitorexit`两个指令来实现同步。
+总：操作系统工作空间分为内核态和用户态，JVM工作在用户态，在偏向锁和轻量级锁时，线程是向用户态申请锁，而用量级锁是向内核态申请锁；
+
+### Java对象头
+
+在 HotSpot 虚拟机中，使用 oop-klass 模型来表示对象。每一个 Java 类，在被 JVM 加载的时候，JVM 会给这个类创建一个 `instanceKlass`，保存在方法区，用来在 JVM 层表示该 Java 类。
+
+当我们在 Java 代码中，使用 new 创建一个对象的时候，JVM 会创建一个 `instanceOopDesc` 对象，这个对象中包含了两部分信息，对象头以及元数据。对象头中有一些运行时数据，其中就包括和多线程相关的锁的信息。元数据其实维护的是指针，指向的是对象所属的类的 `instanceKlass`。
+
+* 在 Java 对象头里的。Hotspot 的对象头主要包括两部分数据：Mark Word（标记字段）、Klass Pointer（类型指针）
+
+  - Mark Word ：默认存储对象的 HashCode，分代年龄和锁标志位信息
+  - Klass Pointer ：对象指向它的类元数据的指针，虚拟机通过这个指针来确定这个对象是哪个类的实例
+
+![image-20200419213508934](https://tva1.sinaimg.cn/large/008i3skNgy1gvlv7g79e1j61pu0u079q02.jpg)
+
+### 锁升级
+
+![](https://tva1.sinaimg.cn/large/008i3skNgy1gvlvci5qt8j61ya0u041o02.jpg)
+
+**总：**
+
+当一个普通对象创建出来时，
+
+* 如果被synchronized修饰，没有竞争的情况下会晋升为偏向锁，如果偏向锁未开启直接晋升为轻量级锁；
+
+* 偏向锁在轻微竞争时，会晋升轻量级锁；在重度竞争，等待时间较长则晋升为重量级锁
+
+* 轻量级锁自旋一定次数后也会晋升为重量级
+
+  * 无锁：
+
+    * 无锁没有对资源进行锁定，所有的线程都能访问并修改同一个资源，但同时只有一个线程能修改成功。CAS 原理及应用即是无锁 的实现
+
+  *   偏向锁：
+
+    * 升级为偏向锁时，会在 Mark Word 里存储锁偏向的线程 ID。在线程进入和退出同步块时不再通过 CAS 操作来加锁和解锁，而是检测 Mark Word 里是否存储着指向当前线程的线程id。引入偏向锁是为了在无多线程竞争的情况下尽量减少不必要的轻量级锁执行路径，因为轻量级锁的获取及释放依赖多次 CAS 原子指令，而偏向锁只需要在置换 ThreadID 的时候依赖一次 CAS 原子指令即可。
+
+  * 轻量级锁
+
+    * 概念：
+      是指当锁是偏向锁的时候，被另外的线程所访问，偏向锁就会升级为轻量级锁，其他线程会通过自旋的形式尝试获取锁，不会阻塞，从而提高性能。
+
+    * 介绍：
+
+      1、升级为轻量级锁时，虚拟机首先将在当前线程的栈帧中建立一个名为锁记录（Lock Record）的空间，用于存储锁对象目前的 Mark Word 的拷贝，然后拷贝对象头中的 Mark Word 复制到锁记录中。
+
+      2、拷贝成功后，虚拟机将使用 CAS 操作尝试将对象的 Mark Word 更新为指向 Lock Record 的指针，并将 Lock Record 里的 owner 指针指向对象的 Mark Word。
+
+      3、如果这个更新动作成功了，那么这个线程就拥有了该对象的锁，并且对象 Mark Word 的锁标志位设置为“00”，表示此对象处于轻量级锁定状态。
+
+      4、如果轻量级锁的更新操作失败了，虚拟机首先会检查对象的 Mark Word 是否指向当前线程的栈帧，如果是就说明当前线程已经拥有了这个对象的锁，那就可以直接进入同步块继续执行，否则说明多个线程竞争锁。
+
+      5、若当前只有一个等待线程，则该线程通过自旋进行等待。但是当自旋超过一定的次数，或者一个线程在持有锁，一个在自旋，又有第三个来访时，轻量级锁升级为重量级锁。
+
+  * 重量级锁
+
+    * 升级为重量级锁时，锁标志的状态值变为“10”，此时 Mark Word 中存储的是指向重量级锁的指针，此时等待锁的线程都会进入阻塞状态，该对象头的Mark Word 中就被设置指向 Monitor 对象的指针
+
+    * 重量级的实现是基于Monitor 
+
+    * Monitor 其实是一种同步工具，也可以说是一种同步机制，它通常被描述为一个对象，基于 c++ 实现的，表示为一个类 objectMonitor 对象，objectMonitor 中几个关键属性：
+
+      - `_owner`：指向持有 Monitor 对象的线程
+      - `_WaitSet`：存放处于 wait 状态的线程队列
+      - `_recursions`：锁的重入次数
+      - `count`：用来记录该线程获取锁的次数
+      - `_EntryList`：存放处于等待锁 block 状态的线程队列
+
+      当多个线程同时访问一段同步代码时，首先会进入`_EntryList`队列中，当某个线程获取到对象的 monitor 后进入`_Owner`区域并把 monitor 中的`_owner`变量设置为当前线程，同时 monitor 中的计数器`_count`加 1。即获得对象锁。
+
+      若持有 monitor 的线程调用 wait()方法，将释放当前持有的 monitor，`_owner`变量恢复为 null，`_count`自减 1，同时该线程进入`_WaitSet`集合中等待被唤醒。若当前线程执行完毕也将释放 monitor(锁)并复位变量的值，以便其他线程进入获取 monitor(锁)
+
+      ![image](https://www.hollischuang.com/wp-content/uploads/2017/12/monitor.png)
+
+      ObjectMonitor 类中提供了几个方法，如`enter`、`exit`、`wait`、`notify`、`notifyAll`等。`sychronized` 加锁的时候，会调用 objectMonitor 的 `enter` 方法，解锁的时候会调用 `exit` 方法。
+
+## synchronized 重入
+
+偏向锁在当前线程栈上重入次数；轻量级锁则在锁记录计数重入次数；重量级锁则线程的ObjectMonitor对象的属性上
+
+* 重量级锁同步方法和同步代码块有差异：
 
 **同步方法：**
 
@@ -724,42 +777,6 @@ synchronized 有两种使用形式，同步方法和同步代码块，对于同�
 同步代码块使用 `monitorenter` 和 `monitorexit`两个指令实现。
 
 可以把执行 `monitorenter` 指令理解为加锁，执行 `monitorexit` 理解为释放锁。 每个对象维护着一个记录着被锁次数的计数器。未被锁定的对象的该计数器为 0，当一个线程获得锁（执行 monitorenter）后，该计数器自增变为 1 ，当同一个线程再次获得该对象的锁的时候，计数器再次自增。当同一个线程释放锁（执行 monitorexit 指令）的时候，计数器再自减。当计数器为 0 的时候，锁将被释放，其他线程便可以获得锁。
-
-## java 对象头
-
-[深入理解多线程（三）—— Java 的对象头](https://www.hollischuang.com/archives/1953)
-
-在 HotSpot 虚拟机中，使用 oop-klass 模型来表示对象。每一个 Java 类，在被 JVM 加载的时候，JVM 会给这个类创建一个 `instanceKlass`，保存在方法区，用来在 JVM 层表示该 Java 类。
-
-当我们在 Java 代码中，使用 new 创建一个对象的时候，JVM 会创建一个 `instanceOopDesc` 对象，这个对象中包含了两部分信息，对象头以及元数据。对象头中有一些运行时数据，其中就包括和多线程相关的锁的信息。元数据其实维护的是指针，指向的是对象所属的类的 `instanceKlass`。
-
-对象头信息是与对象自身定义的数据无关的额外存储成本，考虑到虚拟机的空间效率，Mark Word 被设计成一个非固定的数据结构以便在极小的空间内存储尽量多的信息，它会根据对象的状态复用自己的存储空间。
-
-![image](https://www.hollischuang.com/wp-content/uploads/2018/01/ObjectHead.png)
-
-可以看出，对象头中主要包含了 GC 分代年龄、锁状态标记、哈希码、epoch 等信息。
-
-从上图中可以看出，对象的状态一共有五种，分别是无锁态、轻量级锁、重量级锁、GC 标记和偏向锁，在 32 位的虚拟机中有两个 Bits 是用来存储锁的标记位的，第五种状态额外依赖 1Bit 的空间，使用 0 和 1 来区分来表示，额外的标记为用来区分无锁和偏向锁状态。
-
-## Monitor
-
-> 无论是同步方法还是同步代码块，无论是 `ACC_SYNCHRONIZED` 还是 `monitorenter`、`monitorexit` 都是基于 `Monitor` 实现的
-
-Monitor 其实是一种同步工具，也可以说是一种同步机制，它通常被描述为一个对象，基于 c++ 实现的，表示为一个类 objectMonitor 对象，objectMonitor 中几个关键属性：
-
-- `_owner`：指向持有 Monitor 对象的线程
-- `_WaitSet`：存放处于 wait 状态的线程队列
-- `_recursions`：锁的重入次数
-- `count`：用来记录该线程获取锁的次数
-- `_EntryList`：存放处于等待锁 block 状态的线程队列
-
-当多个线程同时访问一段同步代码时，首先会进入`_EntryList`队列中，当某个线程获取到对象的 monitor 后进入`_Owner`区域并把 monitor 中的`_owner`变量设置为当前线程，同时 monitor 中的计数器`_count`加 1。即获得对象锁。
-
-若持有 monitor 的线程调用 wait()方法，将释放当前持有的 monitor，`_owner`变量恢复为 null，`_count`自减 1，同时该线程进入`_WaitSet`集合中等待被唤醒。若当前线程执行完毕也将释放 monitor(锁)并复位变量的值，以便其他线程进入获取 monitor(锁)
-
-![image](https://www.hollischuang.com/wp-content/uploads/2017/12/monitor.png)
-
-ObjectMonitor 类中提供了几个方法，如`enter`、`exit`、`wait`、`notify`、`notifyAll`等。`sychronized` 加锁的时候，会调用 objectMonitor 的 `enter` 方法，解锁的时候会调用 `exit` 方法。
 
 ## Executors 线程池，为什么不建议使用这个类来创建线程池呢？如何创建？
 
